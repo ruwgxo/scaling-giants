@@ -60,3 +60,49 @@ pattern:
 ```
   
 **Reader Challenge** Contribute a new benchmark or tool to the GitHub repo for this book. How would you ensure its relevance and accuracy?  
+
+2. **Technology Stack Comparison Matrix**  
+  
+**Quick Take** A comparison matrix evaluates technology stacks across scalability, latency, cost, and complexity, helping architects choose tools for billion-user systems.  
+  
+**Details** The matrix compares stacks used in previous chapters (e.g., MySQL, Redis, Kafka) across key metrics, enabling quick decision-making for system design.  
+  
+```
+Table (Markdown)
+
+| Technology | Scalability         | Latency | Cost   | Complexity | Use Case           |
+|------------|---------------------|---------|--------|------------|--------------------|
+| MySQL      | High (sharded)      | <100ms  | Medium | Medium     | Metadata (YouTube) |
+| Redis      | High (clustered)    | <1ms    | High   | Low        | Caching (Slack)    |
+| Kafka      | Very High           | <10ms   | Medium | High       | Streaming (Uber)   |
+| Prometheus | High                | <100ms  | Low    | Medium     | Monitoring (AWS)   |
+| TensorFlow | High (GPU)          | <100ms  | High   | High       | AI (Grok)          |
+| Cloudflare | Very High           | <50ms   | Medium | Medium     | Security (Web)     |
+
+```
+  
+**Lessons Learned**  
+- Scalability varies by sharding or clustering strategy.  
+- Latency-critical systems favor in-memory stores (e.g., Redis).  
+- Cost and complexity trade-offs drive tool selection.  
+  
+```
+YAML Format (for GitHub)
+
+matrix:
+  - technology: MySQL
+    scalability: High (sharded)
+    latency: <100ms
+    cost: Medium
+    complexity: Medium
+    use_case: Metadata (YouTube)
+  - technology: Redis
+    scalability: High (clustered)
+    latency: <1ms
+    cost: High
+    complexity: Low
+    use_case: Caching (Slack)
+
+```
+  
+**Reader Challenge** Add a new technology to the matrix on GitHub. How would you quantify its metrics?  
