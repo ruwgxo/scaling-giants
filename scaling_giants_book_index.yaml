@@ -1,0 +1,434 @@
+# scaling_giants_book_index.yaml
+# 20260511 | Scaling Giants - Book Index by Raghav Dinesh
+# ═══════════════════════════════════════════════════════════════════════════════
+# Scaling Giants: Architecture Lessons from Tech's Most Demanding Systems
+# ═══════════════════════════════════════════════════════════════════════════════
+# Framework: raghav_books_framework.yaml v1.0.0
+# ADRs applied: ADR-001, ADR-002, ADR-003, ADR-004, ADR-005, ADR-006, ADR-007, ADR-008
+
+book_metadata:
+  title: 'Scaling Giants'
+  subtitle: 'Architecture Lessons from Tech''s Most Demanding Systems'
+  full_title: 'Scaling Giants: Architecture Lessons from Tech''s Most Demanding Systems'
+  author: 'Raghav Dinesh'
+  created: '2025-01-01'
+  version: '1.0.0'
+  framework_version: '1.0.0'
+
+  publication_info:
+    target_format: 'Open source — GitHub-hosted Markdown, MIT license (code) + CC BY-SA 4.0 (prose)'
+    github: 'raghavpoonia/scaling-giants'
+    estimated_pages: '280-320'
+    estimated_word_count: '70000-85000'
+    target_publication_date: '2026-Q2'
+    status: 'complete — ready to publish'
+
+  positioning:
+    tagline: >
+      How PayPal, Google, Meta, AWS, and Cloudflare built systems that serve
+      billions — and what every engineer should learn from them.
+    primary_audience: >
+      Staff+ engineers and senior individual contributors who design systems
+      at scale or want to understand the architectural decisions behind the
+      systems they already work on.
+    secondary_audience: >
+      Engineering managers, solutions architects, and technical leads making
+      infrastructure decisions who need to speak credibly about scale trade-offs.
+    competitive_differentiation: >
+      Most system design books teach distributed systems theory or interview prep
+      patterns. Scaling Giants teaches pattern recognition from documented
+      real-world architectures: what Google Ads actually built for 4.77 billion
+      users, how S3 achieves eleven nines, why Uber chose quad-tree indexing.
+      Each chapter extracts transferable patterns, not case study summaries.
+      The same five patterns appear in every domain — the book shows exactly
+      how each domain configures them for its specific constraints.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BOOK STRUCTURE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+book_structure:
+  total_parts: 4
+  total_chapters: 11
+  front_matter:
+    - preface
+  back_matter:
+    - appendix_a
+    - appendix_b
+    - appendix_c
+    - appendix_d
+  estimated_total_pages: '295-330'
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FRONT MATTER
+# ═══════════════════════════════════════════════════════════════════════════════
+
+front_matter:
+  preface:
+    title: 'Preface'
+    file_reference: 'front-matter/preface.md'
+    estimated_pages: 8
+    narrative_arc: >
+      The reader arrives with a question that sounds simple: why do some systems
+      serve billions while others buckle at thousands? The preface answers not
+      with theory but with a promise — eleven chapters, twenty-plus documented
+      architectures, and the specific decisions that determined whether each
+      system survived its own success. By the last page the reader understands
+      what this book is and is not: pattern extraction from documented reality,
+      not a distributed systems textbook, not interview prep.
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PARTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+parts:
+  part_1:
+    title: 'Foundations of Scale'
+    number: 1
+    estimated_pages: '35-40'
+    narrative_arc: >
+      The reader learns to think about scale as a design constraint imposed from
+      the start, not a performance problem to solve after the fact. This part
+      establishes the vocabulary and mental models that every subsequent chapter
+      assumes: exponential growth curves, CAP trade-offs, consistency models,
+      and the arithmetic of complexity. Engineers who skip this part will miss
+      why the domain chapters make the decisions they do.
+
+  part_2:
+    title: 'Domain Architectures'
+    number: 2
+    estimated_pages: '150-175'
+    narrative_arc: >
+      Seven domains, seven architectures, one recurring discovery: the same four
+      or five patterns appear everywhere, configured differently for each domain's
+      specific constraints. The reader builds a pattern vocabulary by watching
+      sharding, caching, event-driven design, and eventual consistency solve
+      different versions of the same problem across payments, search, social,
+      media, gaming, cloud, and data systems.
+
+  part_3:
+    title: 'Next Generation'
+    number: 3
+    estimated_pages: '45-55'
+    narrative_arc: >
+      The reader encounters the architectural challenges that do not yet have
+      stable solutions: AI infrastructure at GPU-cluster scale, edge-native
+      applications and their state management problems, WebAssembly as a portable
+      compute primitive. This part is deliberately less prescriptive than Part 2 —
+      the patterns are still forming, and the reader should leave with informed
+      questions as much as confident answers.
+
+  part_4:
+    title: 'Synthesis'
+    number: 4
+    estimated_pages: '25-30'
+    narrative_arc: >
+      The reader sees all eleven chapters as a single pattern map for the first
+      time. What do PayPal, S3, Cloudflare, and Uber actually share? Which patterns
+      proved universal, which were domain-specific, and what does the next decade
+      look like for engineers building the systems that will serve the generation
+      after this one?
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CHAPTERS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+chapters:
+
+  chapter_1:
+    number: 1
+    title: 'Foundations of Scale'
+    part: 1
+    estimated_pages: 35
+    file_reference: 'part-1-foundations/chapter-01-foundations-of-scale.md'
+    narrative_arc: >
+      The reader starts with a question that sounds simple: what does it actually
+      mean for a system to be at scale? The chapter answers with mathematics first
+      — exponential growth curves, compounding failure rates, the arithmetic of
+      nine-nines uptime — then moves to philosophy: simplicity as a load-bearing
+      design principle, complexity as a liability that compounds as fast as traffic
+      does. The reader ends with the CAP theorem not as a theorem to memorize but
+      as a decision framework they will apply in every subsequent chapter.
+    sections:
+      - '1.1 The philosophy of scale: growth, complexity, and deliberate trade-offs'
+      - '1.2 Understanding exponential growth and its architectural consequences'
+      - '1.3 The cost of complexity versus the discipline of simplicity'
+      - '1.4 CAP theorem in practice: choosing your trade-off before traffic forces it'
+      - '1.5 Consistency models: when eventual consistency is enough and when it is not'
+      - '1.6 Horizontal versus vertical scaling: cost, resilience, and the limits of each'
+
+  chapter_2:
+    number: 2
+    title: 'Financial and Payment Systems'
+    part: 2
+    estimated_pages: 25
+    file_reference: 'part-2-domain-architectures/chapter-02-financial-payment-systems.md'
+    narrative_arc: >
+      The reader discovers that payment systems are the hardest distributed systems
+      problem in this book: you cannot be eventually consistent when money is
+      involved, but you still need to serve 1 billion transactions per day. The
+      chapter traces PayPal's architecture through idempotency, distributed
+      transactions, and real-time fraud detection, revealing why the financial
+      domain chooses consistency over availability at almost every junction — and
+      what that costs in latency, infrastructure complexity, and engineering time.
+    sections:
+      - '2.1 PayPal at 1 billion transactions per day: consistency or bust'
+      - '2.2 Idempotency: the architectural primitive that makes payments safe'
+      - '2.3 Distributed transaction patterns and the limits of two-phase commit'
+      - '2.4 Fraud detection as a real-time stream processing problem'
+      - '2.5 Database architecture for financial workloads: why SQL persists at scale'
+
+  chapter_3:
+    number: 3
+    title: 'Search and Discovery at Scale'
+    part: 2
+    estimated_pages: 25
+    file_reference: 'part-2-domain-architectures/chapter-03-search-discovery-at-scale.md'
+    narrative_arc: >
+      The reader learns that search at scale is not a lookup problem — it is a
+      distributed indexing, real-time bidding, and geospatial matching problem
+      that happens to involve queries. Google Ads demonstrates sharding and index
+      replication at 4.77 billion users; Uber demonstrates that matching a million
+      drivers per second is a spatial indexing problem first and a compute problem
+      second. The reader leaves understanding why the same query takes 50ms in one
+      system and 5ms in another — and exactly which architectural decisions account
+      for that difference.
+    sections:
+      - '3.1 Google Ads: SQL sharding strategies for 4.77 billion users'
+      - '3.2 Real-time bidding architecture: auctions processed in under 50ms'
+      - '3.3 Index distribution and replication at global scale'
+      - '3.4 Uber: geospatial indexing for 1 million driver matches per second'
+      - '3.5 Real-time location stream processing at 10 billion updates per day'
+      - '3.6 Demand prediction: ML models as load-balancing infrastructure'
+
+  chapter_4:
+    number: 4
+    title: 'Social and Communication Platforms'
+    part: 2
+    estimated_pages: 25
+    file_reference: 'part-2-domain-architectures/chapter-04-social-communication-platforms.md'
+    narrative_arc: >
+      The reader encounters the cache consistency problem in its most severe form:
+      Meta serves 4 billion users and even a brief inconsistency in the social
+      graph is visible to hundreds of millions of people simultaneously. The chapter
+      traces Meta's approach to cache invalidation and the distributed social graph
+      store, revealing why eventual consistency is acceptable for feeds but not for
+      friend connections. Slack's real-time messaging architecture then shows what
+      happens when the latency requirement is under 100ms for every single message.
+    sections:
+      - '4.1 Meta at 4 billion users: the cache consistency problem at social scale'
+      - '4.2 The distributed social graph: TAO and how it handles global reads'
+      - '4.3 Eventual consistency for feeds versus strong consistency for connections'
+      - '4.4 Slack: real-time messaging at enterprise scale under 100ms'
+      - '4.5 Presence systems: the deceptively hard problem of showing who is online'
+
+  chapter_5:
+    number: 5
+    title: 'Content and Media Delivery'
+    part: 2
+    estimated_pages: 22
+    file_reference: 'part-2-domain-architectures/chapter-05-content-media-delivery.md'
+    narrative_arc: >
+      The reader learns that content delivery is fundamentally a geographic problem:
+      latency is physics, and the only way to serve video at 5 billion streams per
+      day is to eliminate the distance between the content and the user. YouTube's
+      CDN architecture shows how content platforms trade bandwidth for latency;
+      Netflix's AWS-native rebuild shows how a media company restructured itself
+      around cloud primitives to survive its own growth curve.
+    sections:
+      - '5.1 YouTube: 5 billion streams per day and the CDN design problem'
+      - '5.2 Adaptive bitrate streaming: matching video quality to network reality'
+      - '5.3 Netflix: rebuilding a media company on AWS primitives'
+      - '5.4 Content transcoding pipelines at petabyte scale'
+      - '5.5 Cache invalidation for live and time-sensitive content'
+
+  chapter_6:
+    number: 6
+    title: 'Gaming and Interactive Systems'
+    part: 2
+    estimated_pages: 22
+    file_reference: 'part-2-domain-architectures/chapter-06-gaming-interactive-systems.md'
+    narrative_arc: >
+      The reader discovers that gaming is the most latency-intolerant domain in
+      this book: 100ms is unacceptable in a competitive game, and the state
+      synchronisation problem — keeping thousands of clients in agreement about a
+      shared game world — has no clean distributed systems solution. The chapter
+      examines how large-scale games handle real-time state sync, how matchmaking
+      systems balance skill, latency, and queue time, and what the industry learned
+      from building systems where lag is not a metric but a player complaint.
+    sections:
+      - '6.1 Real-time state synchronisation: the problem no distributed system fully solves'
+      - '6.2 Architectures for millions of concurrent interactive sessions'
+      - '6.3 Matchmaking at scale: skill, latency, and queue time trade-offs'
+      - '6.4 Game server orchestration: dynamic spin-up at player demand'
+      - '6.5 Anti-cheat as distributed security infrastructure'
+
+  chapter_7:
+    number: 7
+    title: 'Cloud Infrastructure and Storage'
+    part: 2
+    estimated_pages: 28
+    file_reference: 'part-2-domain-architectures/chapter-07-cloud-infrastructure-storage.md'
+    narrative_arc: >
+      The reader encounters the infrastructure that makes every other chapter
+      possible. S3's eleven-nines durability is not magic — it is erasure coding,
+      cross-region replication, and a fault model that assumes hardware will fail
+      daily. Cloudflare's 55 million requests per second comes from Anycast routing
+      and edge compute, not from building a bigger data centre. AWS's auto-scaling
+      patterns show how application teams move from a single server to ten million
+      users without rewriting their architecture. The reader leaves understanding
+      that cloud infrastructure is itself a distributed system with its own
+      trade-offs, not a reliability abstraction.
+    sections:
+      - '7.1 Amazon S3: how eleven-nines durability actually works'
+      - '7.2 Erasure coding and cross-region replication as durability primitives'
+      - '7.3 Cross-region disaster recovery and automated failover in practice'
+      - '7.4 Cloudflare: Anycast routing and 55 million requests per second'
+      - '7.5 Edge compute and DDoS mitigation at global network scale'
+      - '7.6 AWS auto-scaling: from one server to ten million users'
+      - '7.7 Database scaling patterns: Aurora sharding and read replicas'
+      - '7.8 Microservices evolution: from monolith to serverless'
+
+  chapter_8:
+    number: 8
+    title: 'Data and Analytics Systems'
+    part: 2
+    estimated_pages: 22
+    file_reference: 'part-2-domain-architectures/chapter-08-data-analytics-systems.md'
+    narrative_arc: >
+      The reader arrives at the chapter that underpins every other domain: the
+      data pipelines and analytics systems behind fraud detection, demand
+      prediction, ad targeting, and content recommendation. This chapter examines
+      warehouse-scale analytics, real-time stream processing, and the architectural
+      decision between batch and streaming — a decision that turns out to be about
+      latency tolerance, not technical preference.
+    sections:
+      - '8.1 Warehouse-scale analytics: design decisions at petabyte query volume'
+      - '8.2 Real-time stream processing for sub-second operational analytics'
+      - '8.3 Batch versus streaming: the latency tolerance decision'
+      - '8.4 Data lake architecture: separating storage and compute at scale'
+      - '8.5 Observability pipelines: turning telemetry into operational intelligence'
+
+  chapter_9:
+    number: 9
+    title: 'Next-Generation Computing'
+    part: 3
+    estimated_pages: 25
+    file_reference: 'part-3-next-generation/chapter-09-next-gen-computing.md'
+    narrative_arc: >
+      The reader confronts the architectural reality of AI infrastructure: GPU
+      clusters are distributed systems problems, training pipelines are distributed
+      compute problems, and inference at scale is a latency and cost optimisation
+      problem that looks nothing like serving web traffic. The chapter examines
+      how large language model infrastructure was built, and what it means for
+      systems design when the dominant workload shifts to matrix multiplication
+      at petascale. The reader leaves with a framework for thinking about AI
+      infrastructure costs and trade-offs, not just model capabilities.
+    sections:
+      - '9.1 GPU cluster architecture: distributed compute for model training'
+      - '9.2 Inference at scale: latency, cost, and throughput trade-offs'
+      - '9.3 The data pipeline problem: feeding models without becoming the bottleneck'
+      - '9.4 AI serving infrastructure: from batch inference to real-time APIs'
+      - '9.5 What 1 million tokens per second actually requires from infrastructure'
+
+  chapter_10:
+    number: 10
+    title: 'Emerging Architectures'
+    part: 3
+    estimated_pages: 22
+    file_reference: 'part-3-next-generation/chapter-10-emerging-architectures.md'
+    narrative_arc: >
+      The reader encounters patterns that are gaining traction but have not yet
+      resolved into stable best practices: edge-native applications, WebAssembly
+      as a portable compute primitive, serverless at the hard limit of cold-start
+      and state constraints. The chapter is deliberately honest about what is
+      proven versus what is speculative — the reader should leave with informed
+      curiosity and a clear sense of which bets are safe to make today.
+    sections:
+      - '10.1 Edge-native architectures: compute at the geographic boundary'
+      - '10.2 WebAssembly beyond the browser: portable compute for distributed systems'
+      - '10.3 Serverless at scale: the cold-start problem and where it actually bites'
+      - '10.4 eBPF and kernel-level observability as infrastructure primitives'
+      - '10.5 Sustainable infrastructure: energy efficiency at data centre scale'
+
+  chapter_11:
+    number: 11
+    title: 'Synthesis and Future'
+    part: 4
+    estimated_pages: 25
+    file_reference: 'synthesis/chapter-11-synthesis-and-future.md'
+    narrative_arc: >
+      The reader sees all eleven chapters as a single pattern map. Sharding,
+      caching, eventual consistency, and event-driven design are not domain-specific
+      patterns — they are the grammar of large-scale systems, and every domain
+      configures them differently for its specific constraints. The chapter names
+      the cross-cutting lessons explicitly, identifies which patterns are universal
+      and which are domain-bound, and frames the next decade: what changes when
+      AI becomes infrastructure, when the edge absorbs what the data centre
+      currently owns, and when the engineers reading this book are the ones
+      deciding what the next generation of systems looks like.
+    sections:
+      - '11.1 The five patterns that appear in every domain'
+      - '11.2 What financial systems teach that no other domain does'
+      - '11.3 Domain-specific constraints versus universal principles'
+      - '11.4 The next decade: AI, edge, and quantum as architectural forces'
+      - '11.5 Applying the pattern vocabulary to your own systems'
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# APPENDICES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+appendices:
+
+  appendix_a:
+    title: 'Technology Stack Comparison Matrix'
+    file_reference: 'appendices/a-technology-stack-matrix.md'
+    estimated_pages: 6
+    sections:
+      - 'Comparison across scalability, latency, cost, and operational complexity'
+      - 'MySQL, Redis, Kafka, Prometheus, TensorFlow, Cloudflare'
+      - 'YAML format for community contribution'
+
+  appendix_b:
+    title: 'Scaling Metrics and Benchmarks'
+    file_reference: 'appendices/b-scaling-metrics-benchmarks.md'
+    estimated_pages: 6
+    sections:
+      - 'Throughput, latency, uptime, and data volume per system'
+      - 'PayPal, YouTube, S3, Cloudflare benchmarks from documented sources'
+      - 'YAML format for community contribution'
+
+  appendix_c:
+    title: 'Open Source Tools for Scale'
+    file_reference: 'appendices/c-open-source-tools.md'
+    estimated_pages: 5
+    sections:
+      - 'Kafka, Prometheus, Jaeger, Redis, Elasticsearch'
+      - 'Use case, strengths, and repository links'
+      - 'YAML format for community contribution'
+
+  appendix_d:
+    title: 'Glossary of Terms'
+    file_reference: 'appendices/d-glossary.md'
+    estimated_pages: 5
+    sections:
+      - 'Sharding, caching, distributed tracing, erasure coding, token bucket'
+      - 'Definitions with real-system examples from the chapters'
+      - 'YAML format for community contribution'
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CROSS REFERENCES (ADR-008)
+# Maximum 4. Forward references only.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+cross_references:
+  description: >
+    Scaling Giants sits in the architecture reading cluster. Readers who finish it
+    should continue with Generative AI System Design for the AI infrastructure layer.
+    Detection Engineering at Scale applies the same pattern vocabulary to the security
+    domain. OSINT provides the intelligence collection layer that feeds the analytics
+    systems described in Chapter 8.
+  forward_references:
+    - 'Generative AI System Design (generative-ai-system-design)'
+    - 'Detection Engineering at Scale (detection-engineering-at-scale)'
+    - 'OSINT: Open Source Intelligence (osint)'
