@@ -15,11 +15,14 @@
   
 1. **Overview**  
   
-**Quick Take** The Front Matter sets the stage for *Scaling Giants*, outlining the motivation, structure, and audience for a deep dive into the architectures of systems serving billions of users. Drawing from tech giants like Google, Meta, and AWS, it prepares readers to explore scalable design principles through real-world examples and practical patterns.  
+**Quick Take**
+ The Front Matter sets the stage for *Scaling Giants*, outlining the motivation, structure, and audience for a deep dive into the architectures of systems serving billions of users. Drawing from tech giants like Google, Meta, and AWS, it prepares readers to explore scalable design principles through real-world examples and practical patterns.  
   
-**The Challenge** Introducing a book on massive-scale systems requires aligning readers with diverse backgrounds—engineers, architects, and leaders—on the complexities of scaling to billions while providing a clear roadmap for navigating the technical content. The Front Matter must distill the essence of scalable architecture, clarify the book’s unique approach, and define who will benefit most from its insights.  
+**The Challenge**
+ Introducing a book on massive-scale systems requires aligning readers with diverse backgrounds—engineers, architects, and leaders—on the complexities of scaling to billions while providing a clear roadmap for navigating the technical content. The Front Matter must distill the essence of scalable architecture, clarify the book’s unique approach, and define who will benefit most from its insights.  
   
 **The Numbers**  
+
 - Systems Covered: 10+ major tech platforms (e.g., Google, Meta, AWS)  
 - Scale Range: 100K to 10B requests/day across case studies  
 - Audience Reach: Engineers, architects, and tech leaders globally  
