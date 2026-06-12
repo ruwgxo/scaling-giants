@@ -68,6 +68,6 @@ Code examples: [MIT](LICENSE)
  
 ## Author
  
-**Raghav Dinesh** | [github.com/raghavpoonia](https://github.com/raghavpoonia)
+**Raghav Dinesh** | [github.com/ruwgxo](https://github.com/ruwgxo)
  
 Detection and Security Platform Engineer with experience building production systems since 2012. *Scaling Giants* draws on publicly documented architectures from the companies that built the systems described — Google, Meta, AWS, Uber, Cloudflare, PayPal, Netflix, and others.
