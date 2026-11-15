@@ -84,4 +84,4 @@ Code examples: [MIT](LICENSE)
 
 **Raghav Dinesh** | [github.com/ruwgxo](https://github.com/ruwgxo)
 
-Detection and Security Platform Engineer, building production systems since 2012.
+Security architect, building production systems since 2012.
