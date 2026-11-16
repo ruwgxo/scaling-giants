@@ -3,7 +3,7 @@ title: Scaling Giants
 subtitle: Architecture Lessons from Tech's Most Demanding Systems
 authors:
 - Raghav Dinesh
-updated: '2026-10-26'
+updated: '2026-11-15'
 version: 2.0.0-draft
 status: rewrite in progress
 language: en
@@ -49,7 +49,7 @@ parts:
   chapters:
   - title: 'Payments: Correctness Under Retries'
     id: ch-payments
-    visibility: author
+    file: chapters/ch02_payments.yaml
   - title: Storage and Durability
     id: ch-storage-durability
     visibility: author
@@ -129,12 +129,14 @@ meta:
       replaces: part-2-domain-architectures/chapter-02-financial-payment-systems.md
       focus: idempotency keys, safe retries, and migrating live payment data without downtime
       sources:
-      - Stripe engineering blog, "Designing robust and predictable APIs with idempotency", 2017
-      - Stripe engineering blog, "Online migrations at scale", 2017
-      - PayPal Holdings annual report (Form 10-K), for payment transaction volume
-      corrects: v1 stated PayPal processes 1 billion transactions a day; annual filings report roughly
-        25 billion payment transactions a year
-      verified: false
+      - Brandur Leach, "Designing robust and predictable APIs with idempotency", Stripe blog, 22 February
+        2017, https://stripe.com/blog/idempotency
+      - Jacqueline Xu, "Online migrations at scale", Stripe blog, 2 February 2017,
+        https://stripe.com/blog/online-migrations
+      corrects: v1's PayPal figure of 1 billion transactions a day is removed. The chapter states no
+        PayPal volume, because the filing that would source one could not be retrieved and checked.
+      verified: true
+      verified_on: '2026-11-15'
     ch-storage-durability:
       replaces: part-2-domain-architectures/chapter-07-cloud-infrastructure-storage.md
       focus: availability versus durability, quorum replication, and verifying a storage node

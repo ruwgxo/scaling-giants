@@ -1,0 +1,401 @@
+title: 'Payments: Correctness Under Retries'
+id: ch02_payments
+updated: '2026-11-15'
+standard: '2.0.0'
+authors:
+- Raghav Dinesh
+language: en
+description: >-
+  How a payment API stays correct when networks fail mid-request: idempotency keys, responsible
+  retries, and changing a live data model without downtime, drawn from two Stripe engineering posts.
+meta:
+  sources_verified: '2026-11-15'
+  replaces: part-2-domain-architectures/chapter-02-financial-payment-systems.md
+  note: >-
+    v1 opened with a PayPal transaction-volume figure that was wrong by more than an order of
+    magnitude. No PayPal figure appears here: the filing that would source one could not be
+    retrieved and checked, and the chapter does not depend on it.
+
+body:
+- type: lead
+  text: >-
+    A payment system has one failure it must never produce: charging someone twice. Every other
+    property, including speed and availability, is negotiable against that one. This chapter is about
+    how an API keeps that guarantee when the network between client and server fails at the worst
+    possible moment, and how the same discipline lets a payment company change its data model while
+    the money keeps moving.
+
+- type: heading
+  level: 2
+  text: Why a Failed Request Is Ambiguous
+  id: ambiguous-failure
+
+- type: prose
+  text: >-
+    Networks fail at some background rate no matter how good they are. Stripe's engineering team
+    describes three places a call between two machines can break: the connection can fail before the
+    server sees the request; the call can fail midway while the server is doing the work; or the work
+    can succeed and the connection break before the server reports it.[^idem]
+
+- type: prose
+  text: >-
+    The first case is safe to retry: the server never saw the request. The other two are not. From
+    the client's side, a request that died midway and a request that succeeded but lost its response
+    look identical. If the request was "charge this card", retrying the first may be the only way to
+    get paid, and retrying the second charges the customer again.
+
+- type: callout
+  variant: example
+  title: Two machines are enough
+  text: >-
+    This is a distributed-systems problem even at the smallest scale. A merchant's server calling a
+    payment API is already two computers passing messages over a network, and inherits every failure
+    mode that implies.[^idem]
+
+- type: heading
+  level: 2
+  text: Idempotency, and Where HTTP Stops Helping
+  id: idempotency
+
+- type: prose
+  text: >-
+    The clean way out is to make operations idempotent: callable any number of times while their side
+    effects happen once. A client that sees any error can then simply retry until it succeeds, and
+    the ambiguity disappears, because retrying is always safe.[^idem]
+
+- type: prose
+  text: >-
+    HTTP already defines `PUT` and `DELETE` as idempotent. Creating a DNS record with a `PUT` that
+    carries the whole record is naturally safe to repeat: a duplicate request finds the record already
+    there and succeeds without changing anything. A charge is different. It is a `POST` that must
+    happen exactly once, and nothing in the request itself tells the server whether it has seen this
+    charge before.[^idem]
+
+- type: heading
+  level: 2
+  text: Idempotency Keys
+  id: idempotency-keys
+
+- type: prose
+  text: >-
+    The fix is to give each operation an identity. The client generates a unique key for the
+    operation and sends it with the request. The server records the key alongside the state of the
+    work, and when a retry arrives carrying the same key, it decides what to do from what it already
+    knows.[^idem]
+
+- type: definition
+  items:
+  - term: The server never saw the first attempt
+    description: >-
+      The retry is the first request with this key, so the server processes it normally.
+  - term: The first attempt failed midway
+    description: >-
+      If the partial work was rolled back by a transactional database, the server can run the whole
+      operation again. Otherwise it recovers the saved state and carries the operation through.
+  - term: The first attempt succeeded but the response was lost
+    description: >-
+      The server returns the stored result of the original operation without doing the work again.
+
+- type: prose
+  text: >-
+    Stripe's API accepts an `Idempotency-Key` header on its mutating (`POST`) endpoints. A client that
+    loses the connection while creating a charge retries with the same key, and the customer is
+    charged once.[^idem]
+
+- type: code
+  lang: bash
+  caption: >-
+    A charge request carrying an idempotency key, adapted from the Stripe post. The secret key is
+    read from the environment; never put one in source.
+  text: |
+    curl https://api.stripe.com/v1/charges \
+      -u "$STRIPE_SECRET_KEY:" \
+      -H "Idempotency-Key: AGJ6FJMkGQIpHUTX" \
+      -d amount=2000 \
+      -d currency=usd \
+      -d description="Charge for Brandur" \
+      -d customer=cus_A8Z5MHwQS7jUmZ
+
+- type: heading
+  level: 3
+  text: A Server-Side Sketch
+  id: server-sketch
+
+- type: prose
+  text: >-
+    The post describes the behaviour, not an implementation. The sketch below is this book's own
+    illustration of one way to build it, not Stripe's code. Three design decisions carry the weight.
+    The charge and the stored response commit in one database transaction, so a crash midway leaves
+    nothing behind and the retry starts clean. A key reused with different parameters is rejected,
+    because returning the first charge's result for a different request would be wrong. A retry that
+    arrives while the first attempt is still running is refused rather than run twice.
+
+- type: code
+  lang: python
+  filename: idempotent_server.py
+  runnable: true
+  caption: >-
+    An idempotent charge endpoint over SQLite. The final lines exercise each case from the
+    definition list above.
+  text: |
+    import hashlib
+    import json
+    import sqlite3
+
+
+    class KeyReusedError(Exception):
+        """The same idempotency key arrived with different request parameters."""
+
+
+    class InProgressError(Exception):
+        """A request with this key is still being processed."""
+
+
+    def open_db():
+        db = sqlite3.connect(":memory:", isolation_level=None)
+        db.executescript("""
+            CREATE TABLE idempotency_keys (
+                key          TEXT PRIMARY KEY,
+                request_hash TEXT NOT NULL,
+                response     TEXT
+            );
+            CREATE TABLE charges (
+                id     INTEGER PRIMARY KEY,
+                amount INTEGER NOT NULL,
+                card   TEXT NOT NULL
+            );
+        """)
+        return db
+
+
+    def create_charge(db, key, params, crash_before_commit=False):
+        request_hash = hashlib.sha256(
+            json.dumps(params, sort_keys=True).encode()).hexdigest()
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            row = db.execute(
+                "SELECT request_hash, response FROM idempotency_keys WHERE key = ?",
+                (key,)).fetchone()
+            if row is not None:
+                stored_hash, response = row
+                if stored_hash != request_hash:
+                    raise KeyReusedError(key)
+                if response is None:
+                    raise InProgressError(key)
+                db.execute("COMMIT")
+                return json.loads(response)          # replay: no second charge
+
+            db.execute("INSERT INTO idempotency_keys (key, request_hash) VALUES (?, ?)",
+                       (key, request_hash))
+            cur = db.execute("INSERT INTO charges (amount, card) VALUES (?, ?)",
+                             (params["amount"], params["card"]))
+            response = {"charge_id": cur.lastrowid, "amount": params["amount"]}
+            if crash_before_commit:
+                raise ConnectionError("process died before commit")
+            db.execute("UPDATE idempotency_keys SET response = ? WHERE key = ?",
+                       (json.dumps(response), key))
+            db.execute("COMMIT")
+            return response
+        except Exception:
+            if db.in_transaction:
+                db.execute("ROLLBACK")
+            raise
+
+
+    db = open_db()
+    params = {"amount": 2000, "card": "tok_visa"}
+
+    # The first attempt dies midway: the transaction rolls back and leaves no charge.
+    try:
+        create_charge(db, "key-1", params, crash_before_commit=True)
+    except ConnectionError:
+        pass
+    assert db.execute("SELECT COUNT(*) FROM charges").fetchone()[0] == 0
+
+    # The retry with the same key is processed normally.
+    first = create_charge(db, "key-1", params)
+
+    # The response was lost and the client retries again: same result, no new charge.
+    replay = create_charge(db, "key-1", params)
+    assert replay == first
+    assert db.execute("SELECT COUNT(*) FROM charges").fetchone()[0] == 1
+
+    # The same key with different parameters is rejected.
+    try:
+        create_charge(db, "key-1", {"amount": 9999, "card": "tok_visa"})
+        raise AssertionError("reused key was accepted")
+    except KeyReusedError:
+        pass
+
+    print("one charge:", first)
+
+- type: callout
+  variant: note
+  title: What the sketch leaves out
+  text: >-
+    An in-progress marker only works if a crashed attempt's marker is eventually cleared or expires;
+    here, the rollback removes it. A production service would also expire stored keys after a
+    retention window and keep the key table on the same database as the charges, so the two always
+    commit together.
+
+- type: heading
+  level: 2
+  text: Retrying Responsibly
+  id: retrying-responsibly
+
+- type: prose
+  text: >-
+    Safe retries create a new risk: a server in the middle of an outage receives every client's
+    retries at once, which can deepen the outage. The Stripe post recommends exponential backoff,
+    where a client waits for a time proportional to 2^n^ after its nth failure, so retries thin out
+    as failures continue.[^idem]
+
+- type: prose
+  text: >-
+    Backoff alone is not enough. Clients that failed together retry together, and their schedules can
+    stay aligned enough to hit the struggling server in waves, the thundering herd problem. Adding
+    random jitter to each wait spreads the retries out and gives the server room to recover. Stripe's
+    Ruby client library retries automatically with an idempotency key, increasing backoff and
+    jitter.[^idem]
+
+- type: code
+  lang: python
+  filename: retry_client.py
+  runnable: true
+  caption: >-
+    A client that retries with one idempotency key, exponential backoff and full jitter. The
+    transport is simulated so the example runs offline.
+  text: |
+    import random
+    import time
+    import uuid
+
+
+    def call_with_retries(send, payload, max_attempts=5, base_delay=0.05, max_delay=2.0):
+        key = str(uuid.uuid4())                  # one key for every attempt of this operation
+        for attempt in range(max_attempts):
+            try:
+                return send(payload, idempotency_key=key)
+            except ConnectionError:
+                if attempt == max_attempts - 1:
+                    raise
+                ceiling = min(max_delay, base_delay * 2 ** attempt)
+                time.sleep(random.uniform(0, ceiling))   # full jitter
+
+
+    # Simulated transport: the first two attempts fail, and the server
+    # deduplicates by key, as in the server sketch.
+    seen = {}
+    failures = iter([True, True])
+
+    def flaky_send(payload, idempotency_key):
+        if next(failures, False):
+            raise ConnectionError("connection reset")
+        if idempotency_key not in seen:
+            seen[idempotency_key] = {"charge_id": len(seen) + 1, **payload}
+        return seen[idempotency_key]
+
+
+    result = call_with_retries(flaky_send, {"amount": 2000})
+    assert len(seen) == 1, "the retries created more than one charge"
+    print("charged once:", result)
+
+- type: list
+  style: bullet
+  items:
+  - '**Consistently:** have clients retry failed operations, or data drifts out of sync.'
+  - '**Safely:** make those retries harmless with idempotency and idempotency keys.'
+  - '**Responsibly:** space retries with exponential backoff and jitter, so recovering servers are
+    not overwhelmed.'
+
+- type: prose
+  text: >-
+    Those three principles close the Stripe post.[^idem] They apply to any API whose operations cost
+    money or cannot be undone, not only to payments.
+
+- type: heading
+  level: 2
+  text: Changing the Data Model While the Money Moves
+  id: online-migrations
+
+- type: prose
+  text: >-
+    Correctness under retries protects individual requests. A payment company also has to change how
+    it stores data without ever stopping, because businesses transact around the clock and there is
+    no maintenance window. Stripe's account of migrating its Subscriptions data shows what that takes.[^mig]
+
+- type: prose
+  text: >-
+    Early on, each customer had at most one subscription, stored inside the customer record. As
+    customers began to need several, the field became an array, and every subscription change meant
+    rewriting the whole customer record. Stripe decided to move subscriptions into their own table:
+    hundreds of millions of objects, referenced from thousands of lines of code across several
+    services.[^mig]
+
+- type: callout
+  variant: note
+  title: Why scale changes the plan
+  text: >-
+    The post's own illustration: at one second per object, migrating one hundred million objects
+    sequentially would take over three years. A migration at this size has to be parallel, offline
+    where it can be, and incremental where it cannot.[^mig]
+
+- type: steps
+  items:
+  - title: Dual-write, then backfill
+    detail: >-
+      Create the new table and write every new subscription to both stores, ramping up the share of
+      duplicated writes while watching database metrics. Copy existing subscriptions lazily as they
+      are updated, then backfill the rest. To find what needed copying without loading the production
+      database, Stripe ran MapReduce jobs (written with Scalding) over database snapshots on its
+      Hadoop cluster, ran a parallel migration, then ran the job again to confirm nothing was missed.
+  - title: Move reads to the new table
+    detail: >-
+      Read from both stores and compare the results in production using GitHub's Scientist library,
+      which alerts on any mismatch without affecting the request. Only after the results agreed did
+      reads switch to the new table.
+  - title: Move writes to the new table
+    detail: >-
+      Reverse the order: write to the new store first and archive to the old one, refactoring code
+      paths in small units with more Scientist experiments watching for inconsistency. Any remaining
+      access to the old field raises a hard error, so stragglers surface immediately.
+  - title: Remove the old data
+    detail: >-
+      Once no code reads the old field, stop writing it, empty it lazily as objects load, and run a
+      final job to find and clear the rest. The new table is now the only source of truth.
+
+- type: prose
+  text: >-
+    The post credits four practices for doing this safely: a phased plan that never needed downtime;
+    heavy data processing moved offline to Hadoop rather than run as expensive production queries;
+    changes small enough that no step touched more than a few hundred lines of code; and verification
+    at every step, so that a single inconsistent record in production raised an alert.[^mig]
+
+- type: heading
+  level: 2
+  text: What Transfers
+  id: what-transfers
+
+- type: list
+  style: bullet
+  items:
+  - '**Treat ambiguity as the normal case.** Design every operation that moves money for the request
+    whose outcome the client cannot know.'
+  - '**Give operations identity.** An idempotency key turns "did this happen?" from a guess into a
+    lookup.'
+  - '**Commit the effect and its record together.** If the work and the stored response can diverge,
+    the key protects nothing.'
+  - '**Make retries polite.** Backoff and jitter are what keep safe retries from becoming an outage.'
+  - '**Migrate as a sequence of verified, reversible steps.** Dual writes, compared reads, small
+    refactors and hard errors on old paths let a live system change shape without stopping.'
+
+- type: footnotes
+  items:
+  - id: idem
+    text: >-
+      Brandur Leach, ["Designing robust and predictable APIs with
+      idempotency"](https://stripe.com/blog/idempotency), Stripe blog, 22 February 2017.
+  - id: mig
+    text: >-
+      Jacqueline Xu, ["Online migrations at scale"](https://stripe.com/blog/online-migrations), Stripe
+      blog, 2 February 2017.

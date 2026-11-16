@@ -30,7 +30,7 @@ The book index, [`scaling_giants_book_index.yaml`](scaling_giants_book_index.yam
 
 **Part II: Domain Architectures**
 
-2. Payments: Correctness Under Retries
+2. [Payments: Correctness Under Retries](chapters/ch02_payments.yaml) ✅ published
 3. Storage and Durability
 4. Data Processing at Google
 5. Sharded and Globally Distributed Databases
@@ -55,11 +55,10 @@ Appendices: a glossary, and the sources for each chapter.
 
 ## v1 Draft (being replaced)
 
-These files remain until their v2 chapters land, then they are removed.
+These files remain until their v2 chapters land, then they are removed. Chapter 2 has been replaced.
 
 - [Preface](front-matter/preface.md)
 - [Chapter 1: Foundations of Scale](part-1-foundations/chapter-01-foundations-of-scale.md)
-- [Chapter 2: Financial and Payment Systems](part-2-domain-architectures/chapter-02-financial-payment-systems.md)
 - [Chapter 3: Search and Discovery at Scale](part-2-domain-architectures/chapter-03-search-discovery-at-scale.md)
 - [Chapter 4: Social and Communication Platforms](part-2-domain-architectures/chapter-04-social-communication-platforms.md)
 - [Chapter 5: Content and Media Delivery](part-2-domain-architectures/chapter-05-content-media-delivery.md)
